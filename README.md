@@ -64,35 +64,42 @@ graph TD
     ReviewPass -- Merge --> Deploy[Deploy to Staging]
 ```
 
-### 3. Advanced (Enterprise Workflow)
-Features complex orchestration including security scanning, environment promotions, and automated rollbacks or manual approvals.
+### 3. Advanced (Enterprise Workflow & Supply Chain Security)
+Features complex orchestration including supply chain attack prevention (dependency pinning, vulnerability scanning, provenance attestation), optional SBOM (Software Bill of Materials) artifact generation and signing, environment promotions, and automated rollbacks or manual approvals.
 
 ```mermaid
 graph TD
-    subgraph Quality Gates
+    subgraph Quality & Security Gates
     A[Static Analysis]
-    B[Security Scan]
-    C[Unit Tests]
+    B[Dependency & SAST Scan]
+    C[Unit & Integration Tests]
     end
 
     Start((Push)) --> A & B & C
     
-    A & B & C --> D{Build & Registry}
+    A & B & C --> D[Build & Package]
+
+    subgraph Supply Chain Hardening [Supply Chain & Attestation]
+    D --> E1[Generate SBOM]
+    D --> E2[Sign Artifact & Attestation]
+    end
+
+    E1 & E2 --> F{Push to Secure Registry}
     
     subgraph Staging
-    D --> E[Deploy]
-    E --> F[Smoke Tests]
+    F --> G[Deploy to Staging]
+    G --> H[Smoke & Integration Tests]
     end
     
-    F --> G{Manual Approval}
+    H --> I{Manual Approval}
     
     subgraph Production
-    G --> H[Blue/Green Deploy]
-    H --> I[Post-Deploy Health Check]
+    I --> J[Blue/Green Deploy]
+    J --> K[Post-Deploy Health Check]
     end
     
-    I -- Fail --> J[Auto-Rollback]
-    I -- Pass --> K((Done))
+    K -- Fail --> L[Auto-Rollback]
+    K -- Pass --> M((Done))
 ```
 
 ## Provider Specific Implementations
