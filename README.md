@@ -7,13 +7,14 @@ This repository contains conceptual and implementation examples of CI/CD deploym
 These examples are provider-agnostic and focus on the workflow structure.
 
 ### 1. Basic (Sequential)
-A simple linear pipeline suitable for small projects or early-stage development. Each step must succeed before the next begins.
+A simple linear pipeline suitable for small projects or early-stage development. Each step must succeed before the next begins. 
+These ideally are running on CI/CD infra so there is no dependence on a single workstation to deploy changes. 
 
 ```mermaid
 graph LR
     A[Lint] --> B[Test]
     B --> C[Build]
-    C --> D[Deploy to Staging]
+    C --> D[Deploy to Prod-like environment]
 ```
 
 ### 2. Medium (Parallel Testing & Pre-Commit Hygiene)
@@ -22,22 +23,22 @@ Introduces local pre-commit guardrails alongside parallel CI execution. The pre-
 ```mermaid
 graph LR
     subgraph Local [Pre-Commit Hook - Staged Files Only]
-    PC1[Auto-Format] --> PC2[Staged Lint & Type Check] --> PC3[Fast Unit Tests]
+    PC1[Auto-Format] --> PC2[Staged Lint & Type Check] --> PC3[Fast Unit Tests - optional]
     end
 
     subgraph CI [Continuous Integration]
     A[Full Lint]
-    B[Unit Tests]
+    B[Unit Tests - run in parrallel when volume warrants it]
     C[Integration Tests]
     end
 
-    PC3 -. Push .-> Trigger((Commit))
+    PC3 -. Commit .-> Trigger((Push))
     Trigger --> A
     Trigger --> B
     Trigger --> C
 
     A & B & C --> D[Build Artifact]
-    D --> E[Deploy to Staging]
+    D --> E[Deploy to Prod-like]
 ```
 
 ### 2.5 Medium+ (PR Automation & Review Bots)
@@ -45,7 +46,7 @@ Builds upon the Medium workflow by integrating automated PR review tooling. Trig
 
 ```mermaid
 graph TD
-    PR((Pull Request Opened/Updated)) --> LocalCI[CI Validation Matrix]
+    PR((Pull Request Published/Updated)) --> LocalCI[CI Validation Matrix]
     PR --> BotReview[Automated PR Review]
 
     subgraph BotReview [PR Bots & Review Automation]
@@ -61,7 +62,7 @@ graph TD
     end
 
     LocalCI & BotReview --> ReviewPass{Checks & Bot Approvals}
-    ReviewPass -- Merge --> Deploy[Deploy to Staging]
+    ReviewPass -- Merge --> Deploy[Deploy to Prod-like]
 ```
 
 ### 3. Advanced (Enterprise Workflow & Supply Chain Security)
@@ -86,12 +87,13 @@ graph TD
 
     E1 & E2 --> F{Push to Secure Registry}
     
-    subgraph Staging
-    F --> G[Deploy to Staging]
-    G --> H[Smoke & Integration Tests]
+    subgraph Prod-like
+    F --> G[Deploy to Prod-like]
+    G --> H1[Smoke & Integration Tests]
+    H1 --> H2[Manual Exploratory Testing]
     end
     
-    H --> I{Manual Approval}
+    H2 --> I{Manual Approval}
     
     subgraph Production
     I --> J[Blue/Green Deploy]
