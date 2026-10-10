@@ -97,13 +97,49 @@ graph TD
     
     H2 & H3 & H4 --> I{Manual Approval}
     
-    subgraph Production
-    I --> J[Blue/Green Deploy]
-    J --> K[Post-Deploy Health Check]
+    subgraph Production [Production: Blue/Green Option]
+    I --> J[Deploy Green Environment]
+    J --> K[Smoke & Health Checks on Green]
+    K --> L[Switch Traffic Router to Green]
     end
     
-    K -- Fail --> L[Auto-Rollback]
-    K -- Pass --> M((Done))
+    L --> M{Post-Cutover Health Check}
+    M -- Fail --> N[Auto-Rollback: Switch Router to Blue]
+    M -- Pass --> O[Decommission Old Blue / Idle]
+```
+
+#### Production Promotion Strategies
+
+Depending on risk tolerance, architecture, and traffic profile, teams typically choose between Blue/Green cutover or progressive Canary promotions:
+
+##### Strategy A: Blue/Green Deployment
+- Spins up an identical target environment (Green) running the new version.
+- Validates the deployment in isolation.
+- Switches router/load balancer traffic instantly from Blue to Green.
+- Rapid rollbacks are accomplished by instantly repointing the router back to Blue.
+
+##### Strategy B: Canary Deployment (Progressive Delivery)
+- Deploys the new revision alongside the current version to a small subset of infrastructure.
+- Incrementally routes real traffic (e.g., 5% &rarr; 25% &rarr; 100%) while automated metric analysis (error rates, latency, APM telemetry) validates system health at each step.
+- Automatically halts and rolls traffic back to 0% if error or latency thresholds are exceeded.
+
+```mermaid
+graph TD
+    Approval((Manual Approval / Auto-Promote)) --> DeployCanary[Deploy Canary Pods / Instances]
+    DeployCanary --> Step1[Route 5% Traffic to Canary]
+    Step1 --> Check1{Metrics Analysis: Error Rate & Latency}
+
+    Check1 -- Degraded --> Rollback1[Auto-Rollback: Route 0% to Canary]
+    Check1 -- Healthy --> Step2[Promote: Route 25% - 50% Traffic]
+    
+    Step2 --> Check2{Metrics Analysis: Error Rate & Latency}
+
+    Check2 -- Degraded --> Rollback2[Auto-Rollback: Route 0% to Canary]
+    Check2 -- Healthy --> Step3[Promote: Route 100% Traffic]
+
+    Step3 --> FinalHealth{Full Production Health Check}
+    FinalHealth -- Degraded --> RollbackFull[Emergency Rollback / Fast Drain]
+    FinalHealth -- Healthy --> Success((Promotion Complete))
 ```
 
 ## Provider Specific Implementations
