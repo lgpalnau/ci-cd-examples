@@ -66,7 +66,7 @@ graph TD
 ```
 
 ### 3. Advanced (Enterprise Workflow & Supply Chain Security)
-Features complex orchestration including supply chain attack prevention (dependency pinning, vulnerability scanning, provenance attestation), optional SBOM (Software Bill of Materials) artifact generation and signing, environment promotions, and automated rollbacks or manual approvals.
+Features complex orchestration including supply chain attack prevention (dependency pinning, vulnerability scanning, provenance attestation), optional SBOM (Software Bill of Materials) artifact generation and signing, environment promotions, and automated rollbacks or manual approvals. Once automated acceptance tests pass in a prod-like environment, parallel post-deployment verification runs: manual exploratory testing, security vulnerability/penetration testing, and performance testing (load, spike, and soak with memory profiling).
 
 ```mermaid
 graph TD
@@ -89,11 +89,13 @@ graph TD
     
     subgraph Prod-like
     F --> G[Deploy to Prod-like]
-    G --> H1[Smoke & Integration Tests]
+    G --> H1[Automated Acceptance Tests]
     H1 --> H2[Manual Exploratory Testing]
+    H1 --> H3[Security Vulnerability & Pen-Testing]
+    H1 --> H4[Performance Testing: Load, Spike & Soak with Memory Profiling]
     end
     
-    H2 --> I{Manual Approval}
+    H2 & H3 & H4 --> I{Manual Approval}
     
     subgraph Production
     I --> J[Blue/Green Deploy]
