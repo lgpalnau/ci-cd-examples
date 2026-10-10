@@ -16,23 +16,52 @@ graph LR
     C --> D[Deploy to Staging]
 ```
 
-### 2. Medium (Parallel Testing)
-Introduces parallelism to speed up the feedback loop. Tests and linting run concurrently.
+### 2. Medium (Parallel Testing & Pre-Commit Hygiene)
+Introduces local pre-commit guardrails alongside parallel CI execution. The pre-commit phase targets only modified files to keep feedback instantaneous (auto-formatting, staged linting, type checks, and rapid unit tests).
 
 ```mermaid
 graph LR
+    subgraph Local [Pre-Commit Hook - Staged Files Only]
+    PC1[Auto-Format] --> PC2[Staged Lint & Type Check] --> PC3[Fast Unit Tests]
+    end
+
     subgraph CI [Continuous Integration]
-    A[Lint]
+    A[Full Lint]
     B[Unit Tests]
     C[Integration Tests]
     end
-    
-    Trigger((Commit)) --> A
+
+    PC3 -. Push .-> Trigger((Commit))
+    Trigger --> A
     Trigger --> B
     Trigger --> C
-    
+
     A & B & C --> D[Build Artifact]
     D --> E[Deploy to Staging]
+```
+
+### 2.5 Medium+ (PR Automation & Review Bots)
+Builds upon the Medium workflow by integrating automated PR review tooling. Triggers on pull requests to provide early feedback directly in review threads prior to merging.
+
+```mermaid
+graph TD
+    PR((Pull Request Opened/Updated)) --> LocalCI[CI Validation Matrix]
+    PR --> BotReview[Automated PR Review]
+
+    subgraph BotReview [PR Bots & Review Automation]
+    R1[AI / Bot Code Review]
+    R2[Coverage & Bundle Diff Comments]
+    R3[Dependency & Secret Scan]
+    end
+
+    subgraph LocalCI [PR CI Checks]
+    C1[Lint & Type Check]
+    C2[Unit & Integration Tests]
+    C3[Build Check]
+    end
+
+    LocalCI & BotReview --> ReviewPass{Checks & Bot Approvals}
+    ReviewPass -- Merge --> Deploy[Deploy to Staging]
 ```
 
 ### 3. Advanced (Enterprise Workflow)
