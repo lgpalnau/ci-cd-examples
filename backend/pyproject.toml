@@ -9,9 +9,10 @@ description = "Basic tier FastAPI example for CI/CD pipelines"
 readme = "README.md"
 requires-python = ">=3.15"
 dependencies = [
-    "fastapi>=0.100.0",
-    "uvicorn>=0.22.0",
-    "httpx>=0.24.0",
+    "fastapi>=0.162.0",
+    "uvicorn>=0.54.0",
+    "zttp>=0.0.34",
+    "httpx>=0.28.1",
 ]
 
 [project.optional-dependencies]
