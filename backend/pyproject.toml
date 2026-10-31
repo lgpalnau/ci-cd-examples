@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ci-cd-examples-fastapi-basic"
+version = "0.1.0"
+description = "Basic tier FastAPI example for CI/CD pipelines"
+readme = "README.md"
+requires-python = ">=3.15"
+dependencies = [
+    "fastapi>=0.100.0",
+    "uvicorn>=0.22.0",
+    "httpx>=0.24.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "ruff>=0.1.0",
+    "ty>=0.0.9",
+    "build>=1.0.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+exclude = ["tests*"]
