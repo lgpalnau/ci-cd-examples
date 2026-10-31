@@ -56,7 +56,7 @@ wheels = [
 ]
 
 [[package]]
-name = "ci-cd-examples-fastapi"
+name = "ci-cd-examples-fastapi-basic"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
