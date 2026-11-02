@@ -6,21 +6,26 @@ default:
 ci: format-check lint typecheck test
 
 # Check code formatting with Ruff
+[directory("backend")]
 format-check:
-    cd backend && uv run ruff format --check .
+    uv run ruff format --check .
 
 # Format code with Ruff
+[directory("backend")]
 format:
-    cd backend && uv run ruff format .
+    uv run ruff format .
 
 # Run Ruff linter
+[directory("backend")]
 lint:
-    cd backend && uv run ruff check .
+    uv run ruff check .
 
 # Run type checks with ty
+[directory("backend")]
 typecheck:
-    cd backend && uv run ty check
+    uv run ty check
 
 # Run pytest unit tests
+[directory("backend")]
 test:
-    cd backend && uv run pytest
+    uv run pytest
